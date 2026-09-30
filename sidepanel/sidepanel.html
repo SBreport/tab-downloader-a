@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>탭 다운로더 A</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <main>
+      <header class="app-header">
+        <h1>탭 다운로더 A</h1>
+        <p class="eyebrow">TD · 0.11.0</p>
+      </header>
+
+      <section class="card current-tab-card">
+        <div class="label-row"><span>현재 탭</span><span id="siteBadge" class="badge">미분석</span></div>
+        <p id="tabTitle" class="tab-title">탭 정보를 읽는 중…</p>
+        <p id="tabUrl" class="url"></p>
+        <button id="analyzeButton" class="primary">현재 탭 분석</button>
+
+        <div id="resultCard" class="analysis-result hidden">
+          <div class="result-summary" aria-label="분석 결과 요약">
+            <span><strong id="assetCount">0</strong>개</span>
+            <span id="contentKind">-</span>
+            <span id="backendName">-</span>
+          </div>
+          <label for="titleInput">저장할 제목</label>
+          <input id="titleInput" type="text" autocomplete="off" />
+
+          <div id="imageOptions" class="setting-row hidden">
+            <div class="setting-copy">
+              <label for="imageFormatSelect">이미지 형식</label>
+              <p id="imageFormatHint" class="hint">원본 그대로 저장</p>
+            </div>
+            <select id="imageFormatSelect">
+              <option value="original">원본 유지</option>
+              <option value="webp">WebP로 통일</option>
+            </select>
+          </div>
+
+          <div id="warningBox" class="warning hidden"></div>
+          <details class="advanced-settings">
+            <summary>저장 위치 및 추가 설정</summary>
+            <div class="setting-row folder-setting">
+              <label for="rootInput">기본 폴더</label>
+              <input id="rootInput" type="text" value="탭 다운로더 A" autocomplete="off" />
+            </div>
+            <p id="pathPreview" class="path-preview"></p>
+          </details>
+        </div>
+
+        <section id="channelCard" class="analysis-result hidden">
+          <div class="label-row">
+            <span id="channelBadge" class="badge">채널 목록</span>
+            <span id="channelSelectedCount" class="badge">0개 선택</span>
+          </div>
+          <p id="channelLoading" class="hint">불러오는 중…</p>
+          <div id="channelLongformGroup" class="channel-group hidden">
+            <div class="label-row channel-group-header">
+              <label><input type="checkbox" id="longformSelectAllCheckbox" class="channel-select-all" data-kind="longform" /> 롱폼 <span id="longformCountBadge" class="count-badge">0</span></label>
+            </div>
+            <div id="longformItemList" class="history-list"></div>
+            <button id="longformMoreButton" class="compact-button hidden" type="button">더 불러오기</button>
+          </div>
+          <div id="channelShortsGroup" class="channel-group hidden">
+            <div class="label-row channel-group-header">
+              <label><input type="checkbox" id="shortsSelectAllCheckbox" class="channel-select-all" data-kind="shorts" /> 숏폼 <span id="shortsCountBadge" class="count-badge">0</span></label>
+            </div>
+            <div id="shortsItemList" class="history-list"></div>
+            <button id="shortsMoreButton" class="compact-button hidden" type="button">더 불러오기</button>
+          </div>
+        </section>
+      </section>
+
+      <section id="taskDock" class="card task-dock" aria-labelledby="downloadHeading">
+        <div class="label-row">
+          <span id="downloadHeading">다운로드</span>
+          <span id="downloadBadge" class="badge">준비 전</span>
+        </div>
+        <button id="downloadButton" class="accent" disabled>현재 탭을 분석해 주세요</button>
+        <div id="progressCard" class="task-progress hidden" aria-live="polite">
+          <progress id="jobProgress" max="1" value="0"></progress>
+          <div class="label-row progress-summary-row">
+            <p id="jobSummary" class="summary"></p>
+            <span id="jobStatus" class="badge">대기</span>
+          </div>
+          <p id="jobLocation" class="path-preview"></p>
+          <div class="task-actions">
+            <button id="cancelJobButton" class="danger compact-button" type="button">취소</button>
+            <button id="openFolderButton" class="secondary" type="button" disabled>폴더 열기</button>
+          </div>
+          <details id="errorDetails" class="hidden">
+            <summary>오류 보기</summary>
+            <pre id="errorText"></pre>
+          </details>
+        </div>
+        <details id="queueDetails" class="queue-panel">
+          <summary>
+            <span>대기열 <span id="queueCount" class="count-badge">0</span></span>
+            <span id="queueStateText" class="summary-note">비어 있음</span>
+          </summary>
+          <div class="queue-content">
+            <div class="queue-toolbar">
+              <button id="queuePauseButton" class="compact-button" type="button">다음 작업 일시정지</button>
+            </div>
+            <div id="queueList" class="history-list">
+              <p class="empty-history">대기 중인 작업이 없습니다.</p>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <div id="nativeOptions" class="native-options hidden">
+        <div class="label-row helper-row">
+          <span>로컬 Media Helper</span><span id="helperBadge" class="badge">확인 중</span>
+        </div>
+        <div id="videoChoice" class="hidden">
+          <label for="videoSelect">발견된 영상</label>
+          <select id="videoSelect"></select>
+        </div>
+        <label for="qualitySelect">영상 품질</label>
+        <select id="qualitySelect" disabled>
+          <option value="best">품질 목록 확인 중…</option>
+        </select>
+        <p id="qualityHint" class="hint"></p>
+      </div>
+
+      <details class="card utility-card">
+        <summary>추가 도구 <span class="summary-note">YouTube 재생목록 스크립트</span></summary>
+        <div class="utility-content" aria-labelledby="playlistHeading">
+          <div class="label-row"><span id="playlistHeading">YouTube 재생목록 스크립트</span><span id="playlistBadge" class="badge">최대 100개</span></div>
+          <label for="playlistUrlInput">재생목록 링크</label>
+          <input id="playlistUrlInput" type="url" inputmode="url" placeholder="https://www.youtube.com/playlist?list=…" autocomplete="off" />
+          <button id="playlistProbeButton" class="primary" type="button">재생목록 확인</button>
+          <div id="playlistPreview" class="playlist-preview hidden">
+            <p id="playlistTitle" class="history-title"></p>
+            <p id="playlistSummary" class="history-meta"></p>
+          </div>
+          <details id="helperInstallHelp" class="helper-install-help hidden">
+            <summary>Helper 0.9.0 재설치 방법</summary>
+            <p>프로젝트 폴더에서 운영체제에 맞는 명령을 다시 실행하세요.</p>
+            <code>Windows: powershell.exe -ExecutionPolicy Bypass -File .\native-helper\install.ps1 -ExtensionId nccjgbgpcokjhaalfdbfmkomielehekd</code>
+            <code>macOS: ./native-helper/install-macos.sh nccjgbgpcokjhaalfdbfmkomielehekd</code>
+          </details>
+        </div>
+      </details>
+
+      <details class="card history-card" aria-labelledby="historyHeading">
+        <summary class="history-summary">
+          <span id="historyHeading">다운로드 기록 <span id="historyCount" class="count-badge">0</span></span>
+          <span class="summary-note">전체 보기</span>
+        </summary>
+        <div class="history-content">
+          <div class="history-toolbar history-heading">
+            <button id="refreshHistoryButton" class="compact-button" type="button">새로고침</button>
+            <button id="clearHistoryButton" class="compact-button" type="button" disabled>완료 삭제</button>
+          </div>
+          <div id="historyList" class="history-list">
+            <p class="empty-history">다운로드 기록이 없습니다.</p>
+          </div>
+          <button id="historyToggleButton" class="history-toggle hidden" type="button">더보기</button>
+        </div>
+      </details>
+
+      <p id="message" class="message" aria-live="polite"></p>
+    </main>
+      <script src="sidepanel.js"></script>
+  </body>
+</html>

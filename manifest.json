@@ -1,0 +1,62 @@
+{
+  "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsbgtJc1ITAxiIushJ3oaoDkZEG/hQTe5+lrR9hJ1UxgpHulYjZr27ytq4uGi5msFTG0+84ShHmyk5R4rbJQPWpXarKCHEktqzUjADT6GvdxHYqtq1kzZtE38y0BmrZww1+/CxJMlmzYahkShBaneCx3Btj05Bz6FpblNyY+N2b56AcRgVjHQoQxgpYglaEX28GpXhK+86iUAB+l2jwXHmV6It7YXEx4UekR9kAoOlKRHtOJwrr6UfIxa+wUd+HdTskDtAyiUuxjSqFDlwzh7QXvbeBrWDHL7CMkql+4JmgDKMJBXbJToKxwSMxpyihYCo4hQovBEuuT5HSdbPAd5jwIDAQAB",
+  "name": "탭 다운로더 A",
+  "version": "0.11.0",
+  "description": "YouTube 영상·스크립트, X 사진·영상, Vimeo 영상을 저장합니다.",
+  "minimum_chrome_version": "114",
+  "permissions": [
+    "activeTab",
+    "alarms",
+    "declarativeNetRequestWithHostAccess",
+    "downloads",
+    "scripting",
+    "sidePanel",
+    "storage",
+    "tabs"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:17385/*",
+    "https://pbs.twimg.com/*"
+  ],
+  "action": {
+    "default_title": "현재 탭 미디어 분석",
+    "default_icon": {
+      "16": "assets/icons/icon-16.png",
+      "32": "assets/icons/icon-32.png"
+    }
+  },
+  "icons": {
+    "16": "assets/icons/icon-16.png",
+    "32": "assets/icons/icon-32.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
+  },
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "content/youtube-transcript.js",
+        "content/youtube-pip.js"
+      ],
+      "css": [
+        "content/youtube-transcript.css",
+        "content/youtube-pip.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "side_panel": {
+    "default_path": "sidepanel/sidepanel.html"
+  }
+}

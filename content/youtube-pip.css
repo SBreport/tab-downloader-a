@@ -1,0 +1,27 @@
+#tab-downloader-pip-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#tab-downloader-pip-button svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  fill: currentColor;
+  pointer-events: none;
+}
+
+#tab-downloader-pip-button[aria-pressed="true"] {
+  color: #3ea6ff;
+}
+
+#tab-downloader-pip-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+#tab-downloader-pip-button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: -4px;
+}

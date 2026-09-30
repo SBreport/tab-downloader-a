@@ -1,0 +1,54 @@
+[
+  {
+    "id": "twitter",
+    "name": "X / Twitter",
+    "hosts": [
+      "x.com",
+      "*.x.com",
+      "twitter.com",
+      "*.twitter.com"
+    ],
+    "pathRegex": "^/[^/]+/status/[0-9]+",
+    "kinds": [
+      "image",
+      "video"
+    ],
+    "backend": "native",
+    "status": "testing",
+    "adapterScript": "content/adapters/twitter.js"
+  },
+  {
+    "id": "youtube",
+    "name": "YouTube",
+    "hosts": [
+      "youtube.com",
+      "*.youtube.com",
+      "youtu.be"
+    ],
+    "pathRegex": "^/(?:watch(?:\\?|$)|shorts/|live/|@[^/?#]+|channel/|c/|user/|[A-Za-z0-9_-]{6,})",
+    "kinds": [
+      "video",
+      "audio",
+      "playlist",
+      "live"
+    ],
+    "backend": "native",
+    "status": "testing",
+    "adapterScript": "content/adapters/youtube.js"
+  },
+  {
+    "id": "vimeo",
+    "name": "Vimeo",
+    "hosts": [
+      "vimeo.com",
+      "www.vimeo.com",
+      "player.vimeo.com"
+    ],
+    "kinds": [
+      "video"
+    ],
+    "backend": "native",
+    "status": "testing",
+    "adapterScript": "content/adapters/embedded-video.js"
+  }
+]
