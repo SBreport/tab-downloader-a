@@ -10,7 +10,7 @@
     <main>
       <header class="app-header">
         <h1>탭 다운로더 A</h1>
-        <p class="eyebrow">TD · 0.11.0</p>
+        <p class="eyebrow">TD · 0.12.0</p>
       </header>
 
       <section class="card current-tab-card">
@@ -38,6 +38,11 @@
               <option value="webp">WebP로 통일</option>
             </select>
           </div>
+
+          <details id="instagramSelection" class="advanced-settings hidden">
+            <summary>저장할 사진·영상 선택</summary>
+            <div id="instagramItems" class="history-list"></div>
+          </details>
 
           <div id="warningBox" class="warning hidden"></div>
           <details class="advanced-settings">

@@ -11,7 +11,7 @@ const QUEUE_PAUSED_KEY = "downloadQueuePaused";
 const MAX_HISTORY_JOBS = 50;
 const MAX_QUEUED_JOBS = 10;
 const ORPHAN_JOB_GRACE_MS = 60_000;
-const CONVERTIBLE_IMAGE_TYPES = new Set(["twitter"]);
+const CONVERTIBLE_IMAGE_TYPES = new Set(["twitter", "instagram"]);
 const TERMINAL_STATUSES = new Set(["completed", "failed", "finished_with_errors", "canceled"]);
 const pendingFilenames = new Map();
 
@@ -483,6 +483,9 @@ async function startDownloadJob(analysis, requestedRoot, options = {}, context =
       throw new Error("이 작업은 WebP 이미지 변환을 지원하지 않습니다.");
     }
     const helper = await probeHelper();
+    if (analysis.type === "instagram" && !helperSupportsVersion(helper.version, [0, 12, 0])) {
+      throw new Error("Instagram WebP 변환에는 Media Helper 0.12.0 이상이 필요합니다. Helper를 업데이트해 주세요.");
+    }
     if (!helperSupportsVersion(helper.version, [0, 7, 0])) {
       throw new Error("WebP 변환에는 Media Helper 0.7.0 이상이 필요합니다. Helper를 다시 설치해 주세요.");
     }
@@ -1101,7 +1104,10 @@ async function reconcileDirectDownload(downloadId, delta = {}, options = {}) {
 
   if (state === "complete") {
     const actualName = download?.filename || "";
-    const unexpectedMime = entry.asset?.kind === "image" && download?.mime && !/^image\//i.test(download.mime);
+    const unexpectedMime = download?.mime && (
+      (entry.asset?.kind === "image" && !/^image\//i.test(download.mime)) ||
+      (entry.asset?.kind === "video" && !/^(?:video\/|application\/octet-stream)/i.test(download.mime))
+    );
     const invalid = !download || download.fileSize <= 0 || /\.(?:html?|htm)$/i.test(actualName) || unexpectedMime;
     const nextJob = await updateJob(entry.jobId, (current) => ({
       ...current,

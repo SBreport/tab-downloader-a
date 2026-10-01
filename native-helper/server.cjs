@@ -726,7 +726,7 @@ const server = http.createServer(async (request, response) => {
     if (request.method === "GET" && url.pathname === "/hello") {
       return send(response, 200, {
         name: "탭 다운로더 A Media Helper",
-        version: "0.11.0",
+        version: "0.12.0",
         platform: process.platform,
         ytDlp: version(config.ytDlpPath, "--version"),
         ffmpeg: version(config.ffmpegPath, "-version"),

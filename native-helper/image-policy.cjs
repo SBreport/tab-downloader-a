@@ -38,7 +38,21 @@ function validateTwitterImageUrl(raw, filename) {
   return { url: url.href, extension };
 }
 
+function validateInstagramImageUrl(raw, filename) {
+  const url = new URL(raw);
+  const extension = filenameExtension(filename, "Instagram");
+  const hostAllowed = /(?:^|\.)cdninstagram\.com$/.test(url.hostname) || /^scontent[.-][a-z0-9.-]+\.fbcdn\.net$/.test(url.hostname);
+  if (url.protocol !== "https:" || !hostAllowed || url.username || url.password || url.port || url.hash ||
+      path.extname(url.pathname).toLowerCase() !== extension) {
+    throw new Error("허용되지 않은 Instagram 이미지 URL입니다.");
+  }
+  return { url: url.href, extension };
+}
+
 function imagePolicy(type) {
+  if (type === "instagram") {
+    return { label: "Instagram", referer: "https://www.instagram.com/", validate: validateInstagramImageUrl, contentType: (value) => value.startsWith("image/") };
+  }
   if (type === "twitter") {
     return {
       label: "X",

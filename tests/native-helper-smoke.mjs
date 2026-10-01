@@ -17,7 +17,7 @@ async function request(method, path, payload, timeoutMs = 120000) {
 }
 
 const hello = await request("GET", "/hello", undefined, 10000);
-if (hello.version !== "0.11.0") throw new Error(`Helper 버전이 0.11.0이 아닙니다: ${hello.version}`);
+if (hello.version !== "0.12.0") throw new Error(`Helper 버전이 0.12.0이 아닙니다: ${hello.version}`);
 console.log("Helper hello:", hello);
 
 const formatRejected = await fetch(`${baseUrl}/start-images`, {

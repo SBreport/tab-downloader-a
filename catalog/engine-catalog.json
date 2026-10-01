@@ -50,5 +50,20 @@
     "backend": "native",
     "status": "testing",
     "adapterScript": "content/adapters/embedded-video.js"
+  },
+  {
+    "id": "insta",
+    "name": "Instagram",
+    "hosts": [
+      "instagram.com",
+      "*.instagram.com"
+    ],
+    "kinds": [
+      "image",
+      "video"
+    ],
+    "backend": "chrome",
+    "status": "testing",
+    "adapterScript": "content/adapters/instagram.js"
   }
 ]

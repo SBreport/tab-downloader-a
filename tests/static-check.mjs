@@ -8,7 +8,7 @@ const root = new URL("../", import.meta.url);
 const manifest = JSON.parse(fs.readFileSync(new URL("manifest.json", root), "utf8"));
 assert.equal(manifest.manifest_version, 3);
 assert.equal(manifest.name, "탭 다운로더 A");
-assert.equal(manifest.version, "0.11.0");
+assert.equal(manifest.version, "0.12.0");
 assert.equal(JSON.parse(fs.readFileSync(new URL("package.json", root), "utf8")).version, manifest.version);
 assert.match(fs.readFileSync(new URL("sidepanel/sidepanel.html", root), "utf8"), new RegExp(`TD · ${manifest.version}`));
 assert.equal(manifest.background.type, "module");
@@ -61,7 +61,7 @@ assert.match(macInstallerSource, /image-converter\.cjs/);
 assert.match(macInstallerSource, /youtube-transcripts\.cjs/);
 
 const catalog = JSON.parse(fs.readFileSync(new URL("catalog/engine-catalog.json", root), "utf8"));
-assert.deepEqual(catalog.map((entry) => entry.id).sort(), ["twitter", "vimeo", "youtube"]);
+assert.deepEqual(catalog.map((entry) => entry.id).sort(), ["insta", "twitter", "vimeo", "youtube"]);
 assert.equal(new Set(catalog.map((entry) => entry.id)).size, catalog.length);
 for (const entry of catalog) {
   assert.ok(entry.id && entry.name && Array.isArray(entry.hosts));
@@ -77,6 +77,7 @@ for (const relative of [
   "content/adapter-runtime.js",
   "content/analyzer.js",
   "content/adapters/embedded-video.js",
+  "content/adapters/instagram.js",
   "content/youtube-transcript.js",
   "content/youtube-pip.js",
   "content/adapters/youtube.js",

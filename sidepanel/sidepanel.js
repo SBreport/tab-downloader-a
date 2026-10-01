@@ -1,5 +1,7 @@
 const elements = {
   analyzeButton: document.querySelector("#analyzeButton"),
+  instagramSelection: document.querySelector("#instagramSelection"),
+  instagramItems: document.querySelector("#instagramItems"),
   downloadButton: document.querySelector("#downloadButton"),
   downloadBadge: document.querySelector("#downloadBadge"),
   resultCard: document.querySelector("#resultCard"),
@@ -166,9 +168,19 @@ function selectedImageFormat() {
   return isImageAnalysis() ? elements.imageFormatSelect.value || "original" : "original";
 }
 
+function selectedRangeAnalysis(value = analysis) {
+  if (value?.type === "instagram") {
+    const indexes = new Set([...elements.instagramItems.querySelectorAll("input:checked")].map((input) => Number(input.value)));
+    const assets = value.assets.filter((_asset, index) => indexes.has(index));
+    return { ...value, assets, mediaCount: assets.length, expectedCount: assets.length };
+  }
+  return value;
+}
+
 function analysisDownloadLabel() {
   if (!analysis || analysis.kind === "channel-listing") return "현재 탭을 분석해 주세요";
-  const selected = analysis;
+  const selected = selectedRangeAnalysis();
+  if (analysis.type === "instagram") return selected.assets.length ? `선택한 미디어 ${selected.assets.length}개 다운로드` : "저장할 사진·영상을 선택해 주세요";
   const count = Math.max(1, Number(selected.mediaCount || selected.expectedCount) || selected.assets?.length || 1);
   if (isImageAnalysis(selected)) return `이미지 ${count}개 다운로드`;
   const kind = selected.assets?.[0]?.kind;
@@ -202,7 +214,7 @@ function updateDownloadAction() {
   if (downloadTarget === "analysis" && analysis) {
     label = analysisDownloadLabel();
     badge = analysisDownloadReady ? "준비 완료" : "확인 중";
-    ready = analysisDownloadReady;
+    ready = analysisDownloadReady && (analysis.type !== "instagram" || selectedRangeAnalysis().assets.length > 0);
   } else if (downloadTarget === "playlist" && playlistAnalysis) {
     const count = Number(playlistAnalysis.mediaCount) || 0;
     label = `스크립트 ${count}개 다운로드`;
@@ -292,6 +304,18 @@ async function prepareNativeOptions(value, generation) {
 function renderAnalysis(value) {
   analysis = value;
   analysisDownloadReady = false;
+  elements.instagramSelection.classList.toggle("hidden", value.type !== "instagram");
+  elements.instagramItems.replaceChildren();
+  if (value.type === "instagram") value.assets.forEach((asset, index) => {
+    const label = document.createElement("label");
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = String(index);
+    input.checked = true;
+    input.addEventListener("change", updateDownloadAction);
+    label.append(input, ` ${asset.filename} · ${asset.kind === "video" ? "영상" : "사진"}`);
+    elements.instagramItems.append(label);
+  });
   if (value.kind === "channel-listing") {
     elements.resultCard.classList.add("hidden");
     setDownloadTarget("channel");
@@ -979,7 +1003,7 @@ async function analyzeCurrentTab() {
       if (!helper?.ok) throw new Error(`Media Helper 연결 실패: ${helper?.error || "설치 상태를 확인하세요."}`);
       analysisDownloadReady = Boolean(analysis.complete);
       updateDownloadAction();
-      const selected = analysis;
+      const selected = selectedRangeAnalysis();
       showMessage(selectedImageFormat() === "webp"
         ? `${selected.assets.length}개 이미지를 WebP로 저장할 준비가 됐습니다.`
         : `${selected.assets.length}개 원본 이미지를 Helper로 안전하게 저장할 준비가 됐습니다.`);
@@ -1008,7 +1032,7 @@ async function startDownload() {
   const useHelper = isNativeAnalysis() || imageFormat === "webp";
   showMessage(useHelper ? "Media Helper에 미디어 작업을 전달하고 있습니다…" : "Chrome 다운로드 항목에 등록하고 있습니다…");
   try {
-    const selected = analysis;
+    const selected = selectedRangeAnalysis();
     if (!useHelper) await ensureDirectAssetPermissions(selected.assets);
     const requested = { ...selected, title: elements.titleInput.value.trim() || analysis.title };
     const response = await chrome.runtime.sendMessage({
