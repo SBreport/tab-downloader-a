@@ -8,7 +8,7 @@ const root = new URL("../", import.meta.url);
 const manifest = JSON.parse(fs.readFileSync(new URL("manifest.json", root), "utf8"));
 assert.equal(manifest.manifest_version, 3);
 assert.equal(manifest.name, "탭 다운로더 A");
-assert.equal(manifest.version, "0.12.0");
+assert.equal(manifest.version, "0.12.1");
 assert.equal(JSON.parse(fs.readFileSync(new URL("package.json", root), "utf8")).version, manifest.version);
 assert.match(fs.readFileSync(new URL("sidepanel/sidepanel.html", root), "utf8"), new RegExp(`TD · ${manifest.version}`));
 assert.equal(manifest.background.type, "module");
@@ -39,8 +39,7 @@ const serviceWorkerSource = fs.readFileSync(new URL("background/service-worker.j
 assert.match(serviceWorkerSource, /resourceTypes:\s*\[[^\]]*"main_frame"[^\]]*"other"/s);
 assert.match(serviceWorkerSource, /const DEFAULT_ROOT = "탭 다운로더 A"/);
 assert.match(serviceWorkerSource, /LEGACY_ROOTS = new Set\(\["Tab Media Downloader"\]\)/);
-assert.match(serviceWorkerSource, /onDeterminingFilename\.addListener\(\(item, suggest\)/);
-assert.match(serviceWorkerSource, /item\.byExtensionId !== chrome\.runtime\.id/);
+assert.doesNotMatch(serviceWorkerSource, /onDeterminingFilename\.addListener/);
 assert.match(serviceWorkerSource, /chrome\.downloads\.download\(\{\s*url: asset\.url,\s*filename,/s);
 assert.match(serviceWorkerSource, /const JOB_QUEUE_KEY = "downloadJobQueue"/);
 assert.match(serviceWorkerSource, /type === "GET_DOWNLOAD_QUEUE"/);

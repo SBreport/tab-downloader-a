@@ -13,7 +13,6 @@ const MAX_QUEUED_JOBS = 10;
 const ORPHAN_JOB_GRACE_MS = 60_000;
 const CONVERTIBLE_IMAGE_TYPES = new Set(["twitter", "instagram"]);
 const TERMINAL_STATUSES = new Set(["completed", "failed", "finished_with_errors", "canceled"]);
-const pendingFilenames = new Map();
 
 function normalizeBrandRoot(value) {
   const root = sanitizeRoot(value || DEFAULT_ROOT);
@@ -433,6 +432,7 @@ async function installRefererRules(assets) {
     },
     condition: {
       requestDomains: [host],
+      initiatorDomains: [chrome.runtime.id],
       resourceTypes: ["main_frame", "sub_frame", "image", "media", "other", "xmlhttprequest"],
     },
   }));
@@ -453,7 +453,7 @@ async function finishDirectJobIfNeeded(job) {
 }
 
 function assertAnalysis(analysis) {
-  if (!["youtube", "twitter", "vimeo", "youtube_playlist_transcript"].includes(analysis?.type)) {
+  if (!["youtube", "twitter", "vimeo", "instagram", "youtube_playlist_transcript"].includes(analysis?.type)) {
     throw new Error("버전 A에서 지원하지 않는 사이트입니다.");
   }
   if (!analysis || !Array.isArray(analysis.assets) || !analysis.assets.length) {
@@ -564,7 +564,6 @@ async function startDirectDownloadJob(analysis, requestedRoot, context = {}) {
         asset.filename,
         asset.folder,
       );
-      pendingFilenames.set(asset.url, filename);
       const downloadId = await chrome.downloads.download({
         url: asset.url,
         filename,
@@ -588,7 +587,6 @@ async function startDirectDownloadJob(analysis, requestedRoot, context = {}) {
         status: "downloading",
       }));
     } catch (error) {
-      pendingFilenames.delete(asset.url);
       await updateJob(jobId, (current) => ({
         ...current,
         failed: current.failed + 1,
@@ -923,20 +921,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   beginHelperPolling(alarm.name.slice("helper-job:".length));
 });
 
-chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
-  if (item.byExtensionId !== chrome.runtime.id) {
-    suggest();
-    return;
-  }
-  const requested = pendingFilenames.get(item.url) || pendingFilenames.get(item.finalUrl);
-  if (!requested) {
-    suggest();
-    return;
-  }
-  pendingFilenames.delete(item.url);
-  pendingFilenames.delete(item.finalUrl);
-  suggest({ filename: requested, conflictAction: "uniquify" });
-});
+// 파일명은 downloads.download({ filename })에서만 지정한다.
+// 전역 파일명 리스너는 빈 suggest()도 다른 확장의 파일명 결정과 충돌할 수 있다.
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === "START_DOWNLOAD") {

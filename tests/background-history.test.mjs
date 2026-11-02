@@ -38,12 +38,16 @@ globalThis.chrome = {
   },
   declarativeNetRequest: {
     getSessionRules: async () => [],
-    updateSessionRules: async () => {},
+    updateSessionRules: async ({ addRules = [] }) => {
+      for (const rule of addRules) {
+        assert.deepEqual(rule.condition.initiatorDomains, [chrome.runtime.id], "Referer 변경은 이 확장이 시작한 요청에만 적용해야 한다");
+      }
+    },
   },
   downloads: {
     async download(options) {
       const id = nextDownloadId++;
-      let filename = options.url.split("/").at(-1);
+      let filename = options.filename || options.url.split("/").at(-1);
       const item = { id, url: options.url, finalUrl: options.url, filename, byExtensionId: chrome.runtime.id };
       for (const listener of determiningFilenameListeners) {
         listener(item, (suggestion) => {
@@ -520,4 +524,30 @@ test('A는 지원하지 않는 타입의 직접 다운로드 요청을 거부한
     assert.equal(result.ok, false);
     assert.match(result.error, /버전 A에서 지원하지 않는 사이트/);
   }
+});
+
+
+test("다른 확장·일반 다운로드의 파일명 결정에 참여하지 않는다", () => {
+  assert.equal(determiningFilenameListeners.length, 0);
+});
+
+test("다른 확장의 완료·실패 이벤트는 작업 기록을 변경하지 않는다", async () => {
+  const before = structuredClone(storage);
+  for (const listener of changedListeners) {
+    await listener({ id: 900001, state: { current: "complete" } });
+    await listener({ id: 900002, state: { current: "interrupted" }, error: { current: "USER_CANCELED" } });
+  }
+  assert.deepEqual(storage, before);
+});
+
+
+test("전역 파일명 리스너 없이 직접 지정한 폴더와 파일명을 유지한다", async () => {
+  const started = await sendMessage({ type: "START_DOWNLOAD", root: "Isolation Test", analysis: {
+    type: "instagram", title: "파일명 유지", complete: true,
+    assets: [{ id: "filename-check", kind: "image", url: "https://instant.example.com/server-random-name.jpg", filename: "0001.jpg", referer: "https://www.instagram.com/", delivery: { mode: "direct" } }],
+  } });
+  assert.equal(started.ok, true);
+  const item = [...downloads.values()].at(-1);
+  assert.ok(item.filename.endsWith(["Isolation Test", "instagram", "파일명 유지", "0001.jpg"].join("\\")), item.filename);
+  assert.equal(determiningFilenameListeners.length, 0);
 });
